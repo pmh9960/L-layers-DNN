@@ -143,7 +143,9 @@ def L_model_backward_with_regularization(AL, Y, caches, lambd):
     return grads
 
 
-def optimize(hyperparameters, train_set_x, train_set_y, parameters, print_cost):
+def optimize_with_regularization(
+    hyperparameters, train_set_x, train_set_y, parameters, print_cost
+):
 
     layer_dims, lambd, learning_rate, iterations, seed = hyperparameters
     L = len(layer_dims) - 1
@@ -168,18 +170,3 @@ def optimize(hyperparameters, train_set_x, train_set_y, parameters, print_cost):
             costs.append(cost)
 
     return parameters, grads, costs
-
-
-def predict(L, X, parameters):
-    AL, caches = L_model_forward(L, X, parameters)
-    print(AL)
-    Y_predicted = np.zeros((1, AL.shape[1]))
-    for i in range(AL.shape[1]):
-        if AL[0][i] > 0.5:
-            Y_predicted[0][i] = 1
-        else:
-            Y_predicted[0][i] = 0
-
-    assert Y_predicted.shape == (1, AL.shape[1])
-
-    return Y_predicted
