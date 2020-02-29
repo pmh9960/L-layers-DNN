@@ -1,7 +1,8 @@
 # Custom
 images/
 results/
-source/test
+.vscode/
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

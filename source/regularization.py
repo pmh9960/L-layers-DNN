@@ -147,7 +147,7 @@ def optimize_with_regularization(
     hyperparameters, train_set_x, train_set_y, parameters, print_cost
 ):
 
-    layer_dims, lambd, learning_rate, iterations, seed = hyperparameters
+    (layer_dims, learning_rate, iterations, lambd, _, _, _,) = hyperparameters
     L = len(layer_dims) - 1
     costs = []
 
