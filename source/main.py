@@ -30,11 +30,7 @@ test_set_x = test_set_x_flatten / 255.0
 layer_dims = [train_set_x.shape[0], 3, train_set_y.shape[0]]
 lambd = 0.1
 learning_rate = 0.01
-<<<<<<< HEAD
 iterations = 5000
-=======
-iterations = 100
->>>>>>> f1b2be9e111a5963c4693bd3f9c996209aafc55b
 seed = int(current_time)
 hyperparameters = (layer_dims, lambd, learning_rate, iterations, seed)
 
@@ -60,13 +56,8 @@ parameters, grads, costs = optimize_with_regularization(
 
 # costs = prev_costs + costs
 
-<<<<<<< HEAD
 # # Grad Chek
 # gradient_check(layer_dims, lambd, train_set_x, train_set_y, parameters)
-=======
-# Grad Chek
-gradient_check(layer_dims, lambd, train_set_x, train_set_y, parameters)
->>>>>>> f1b2be9e111a5963c4693bd3f9c996209aafc55b
 
 # Plot
 plt.xlabel("iteration (hundred)")
@@ -84,11 +75,8 @@ dir = root + "/results/" + current_time_str + "/"
 access_rights = 0o755
 os.mkdir(dir, access_rights)
 
-<<<<<<< HEAD
 plt.savefig(dir + current_time_str + ".png", dpi=300)
 
-=======
->>>>>>> f1b2be9e111a5963c4693bd3f9c996209aafc55b
 with open(dir + current_time_str + "_parameters.pkl", "wb") as f:
     pickle.dump(parameters, f)
 with open(dir + current_time_str + "_costs.pkl", "wb") as f:
@@ -102,10 +90,6 @@ with open(dir + current_time_str + "_hyperparameters.txt", "wt") as f:
     f.write("Iteration : " + str(iterations) + "\n")
     f.write("Lambda : " + str(lambd) + "\n")
     f.write("Learning rate : " + str(learning_rate) + "\n")
-<<<<<<< HEAD
-=======
-
->>>>>>> f1b2be9e111a5963c4693bd3f9c996209aafc55b
 # with open(dir / current_time_str + "_parameters" + with_open + ".pkl", "wb") as f:
 #     pickle.dump(parameters, f)
 # with open(dir / current_time_str + "_costs" + with_open + ".pkl", "wb") as f:
