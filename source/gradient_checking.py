@@ -3,7 +3,7 @@ import numpy as np
 from lr_utils import *
 from gc_utils import dictionary_to_vector, vector_to_dictionary, gradients_to_vector
 from dnn import L_model_forward
-from improved_dnn import L_model_backward_with_regularization
+from regularization import L_model_backward_with_regularization
 
 
 # GRADED FUNCTION: gradient_check_n

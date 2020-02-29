@@ -11,15 +11,19 @@ from scipy import ndimage
 from lr_utils import load_dataset
 from regularization import *
 from gradient_checking import gradient_check_n, gradient_check
+from adam import optimize_with_adam
 
 current_time = time.time()
 current_time_str = time.strftime("%Y%m%d_%H%M", time.localtime(current_time))
+seed = int(current_time)
+np.random.seed(seed)
 
 # Loading the data (cat/non-cat)
 train_set_x_orig, train_set_y, test_set_x_orig, test_set_y, classes = load_dataset()
 m_train = train_set_x_orig.shape[0]
 m_test = test_set_x_orig.shape[0]
 num_px = train_set_x_orig.shape[1]
+
 # Reshape the training and test examples
 train_set_x_flatten = train_set_x_orig.reshape(m_train, -1).T
 test_set_x_flatten = test_set_x_orig.reshape(m_test, -1).T
@@ -28,11 +32,13 @@ test_set_x = test_set_x_flatten / 255.0
 
 # Hyperparameters
 layer_dims = [train_set_x.shape[0], 3, train_set_y.shape[0]]
-lambd = 0.1
 learning_rate = 0.01
-iterations = 5000
-seed = int(current_time)
-hyperparameters = (layer_dims, lambd, learning_rate, iterations, seed)
+iterations = 2000
+lambd = 0.1
+beta1 = 0.9
+beta2 = 0.999
+epsilon = 1e-8
+hyperparameters = (layer_dims, learning_rate, iterations, lambd, beta1, beta2, epsilon)
 
 # Initialize
 parameters = initialize_parameters_he(layer_dims)
@@ -47,10 +53,11 @@ parameters = initialize_parameters_he(layer_dims)
 # with open(opened_file_costs, "rb") as f:
 #     prev_costs = pickle.loads(f)
 # layer_dims, lambd, learning_rate, iterations, seed = hyperparameters
-np.random.seed(seed)
+
+print(parameters)
 
 # Optimize
-parameters, grads, costs = optimize_with_regularization(
+parameters, grads, costs = optimize_with_adam(
     hyperparameters, train_set_x, train_set_y, parameters, print_cost=True,
 )
 
@@ -84,12 +91,15 @@ with open(dir + current_time_str + "_costs.pkl", "wb") as f:
 with open(dir + current_time_str + "_hyperparameters.pkl", "wb") as f:
     pickle.dump(hyperparameters, f)
 with open(dir + current_time_str + "_hyperparameters.txt", "wt") as f:
-    f.write("Hyperparameters\n")
+    f.write("Hyperparameters\n\n")
     f.write("Seed : " + str(seed) + "\n")
-    f.write("Layers dimensions : " + str(layer_dims) + "\n")
     f.write("Iteration : " + str(iterations) + "\n")
-    f.write("Lambda : " + str(lambd) + "\n")
+    f.write("Layers dimensions : " + str(layer_dims) + "\n")
     f.write("Learning rate : " + str(learning_rate) + "\n")
+    f.write("Lambda : " + str(lambd) + "\n")
+    f.write("Beta1 : " + str(beta1) + "\n")
+    f.write("Beta2 : " + str(beta2) + "\n")
+    f.write("Epsilon : " + str(epsilon) + "\n")
 # with open(dir / current_time_str + "_parameters" + with_open + ".pkl", "wb") as f:
 #     pickle.dump(parameters, f)
 # with open(dir / current_time_str + "_costs" + with_open + ".pkl", "wb") as f:
