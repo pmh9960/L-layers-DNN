@@ -2,8 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import h5py
 import scipy
-import time
 import pickle
+import time
+import os
 from pathlib import Path
 from PIL import Image
 from scipy import ndimage
@@ -13,9 +14,6 @@ from gradient_checking import gradient_check_n, gradient_check
 
 current_time = time.time()
 current_time_str = time.strftime("%Y%m%d_%H%M", time.localtime(current_time))
-
-root = Path(".")
-dir = root / "source" / "results"
 
 # Loading the data (cat/non-cat)
 train_set_x_orig, train_set_y, test_set_x_orig, test_set_y, classes = load_dataset()
@@ -32,7 +30,7 @@ test_set_x = test_set_x_flatten / 255.0
 layer_dims = [train_set_x.shape[0], 3, train_set_y.shape[0]]
 lambd = 0.1
 learning_rate = 0.01
-iterations = 3000
+iterations = 100
 seed = int(current_time)
 hyperparameters = (layer_dims, lambd, learning_rate, iterations, seed)
 
@@ -58,19 +56,6 @@ parameters, grads, costs = optimize(
 
 # costs = prev_costs + costs
 
-with open(dir / (current_time_str + "_parameters.pkl"), "wb") as f:
-    pickle.dump(parameters, f)
-with open(dir / (current_time_str + "_costs.pkl"), "wb") as f:
-    pickle.dump(costs, f)
-with open(dir / (current_time_str + "_hyperparameters.pkl"), "wb") as f:
-    pickle.dump(hyperparameters, f)
-# with open(dir / current_time_str + "_parameters" + with_open + ".pkl", "wb") as f:
-#     pickle.dump(parameters, f)
-# with open(dir / current_time_str + "_costs" + with_open + ".pkl", "wb") as f:
-#     pickle.dump(costs, f)
-# with open(dir / current_time_str + "_hyperparameters" + with_open + ".pkl", "wb") as f:
-#     pickle.dump(hyperparameters, f)
-
 # Grad Chek
 gradient_check(layer_dims, lambd, train_set_x, train_set_y, parameters)
 
@@ -89,5 +74,32 @@ print(accuracy)
 
 result = {"Y_predicted": Y_predicted, "accuracy": accuracy}
 
-with open(dir / (current_time_str + "_result.pkl"), "wb") as f:
+# Save results
+root = os.getcwd()
+dir = root + "/results/" + current_time_str + "/"
+access_rights = 0o755
+os.mkdir(dir, access_rights)
+
+with open(dir + current_time_str + "_parameters.pkl", "wb") as f:
+    pickle.dump(parameters, f)
+with open(dir + current_time_str + "_costs.pkl", "wb") as f:
+    pickle.dump(costs, f)
+with open(dir + current_time_str + "_hyperparameters.pkl", "wb") as f:
+    pickle.dump(hyperparameters, f)
+with open(dir + current_time_str + "_hyperparameters.txt", "wt") as f:
+    f.write("Hyperparameters\n")
+    f.write("Seed : " + str(seed) + "\n")
+    f.write("Layers dimensions : " + str(layer_dims) + "\n")
+    f.write("Iteration : " + str(iterations) + "\n")
+    f.write("Lambda : " + str(lambd) + "\n")
+    f.write("Learning rate : " + str(learning_rate) + "\n")
+
+# with open(dir / current_time_str + "_parameters" + with_open + ".pkl", "wb") as f:
+#     pickle.dump(parameters, f)
+# with open(dir / current_time_str + "_costs" + with_open + ".pkl", "wb") as f:
+#     pickle.dump(costs, f)
+# with open(dir / current_time_str + "_hyperparameters" + with_open + ".pkl", "wb") as f:
+#     pickle.dump(hyperparameters, f)
+with open(dir + current_time_str + "_result_" + str(accuracy) + ".pkl", "wb") as f:
     pickle.dump(result, f)
+
