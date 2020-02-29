@@ -14,6 +14,8 @@ from gradient_checking import gradient_check_n, gradient_check
 
 current_time = time.time()
 current_time_str = time.strftime("%Y%m%d_%H%M", time.localtime(current_time))
+current_time_str = current_time_str[2:]
+print(current_time_str)
 
 # Loading the data (cat/non-cat)
 train_set_x_orig, train_set_y, test_set_x_orig, test_set_y, classes = load_dataset()
@@ -88,7 +90,7 @@ with open(dir + current_time_str + "_hyperparameters.txt", "wt") as f:
     f.write("Seed : " + str(seed) + "\n")
     f.write("Layers dimensions : " + str(layer_dims) + "\n")
     f.write("Iteration : " + str(iterations) + "\n")
-    f.write("Lambda : " + str(lambd) + "\n")
+    f.write("Regularization factor Lambda : " + str(lambd) + "\n")
     f.write("Learning rate : " + str(learning_rate) + "\n")
 # with open(dir / current_time_str + "_parameters" + with_open + ".pkl", "wb") as f:
 #     pickle.dump(parameters, f)
