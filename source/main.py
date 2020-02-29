@@ -55,8 +55,6 @@ parameters = initialize_parameters_he(layer_dims)
 #     prev_costs = pickle.loads(f)
 # layer_dims, lambd, learning_rate, iterations, seed = hyperparameters
 
-print(parameters)
-
 # Optimize
 parameters, grads, costs = optimize_with_adam(
     hyperparameters, train_set_x, train_set_y, parameters, print_cost=True,

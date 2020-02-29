@@ -137,9 +137,9 @@ def optimize_with_adam(
     L = len(layer_dims) - 1
     costs = []
     v, s = initialize_adam(L, parameters)
+
     for i in range(1, iterations):
         # Forward propagation
-        print(parameters)
         AL, caches = L_model_forward(L, train_set_x, parameters)
         # Compute cost
         cost = compute_cost_with_regularization(
@@ -150,7 +150,7 @@ def optimize_with_adam(
         grads = L_model_backward_with_regularization(AL, train_set_y, caches, lambd)
 
         # Update parameters
-        parameters = update_parameters_with_adam(
+        parameters, v, s = update_parameters_with_adam(
             parameters, grads, v, s, i, learning_rate,
         )
         if i % 100 == 0 and print_cost:
