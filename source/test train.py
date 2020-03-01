@@ -23,7 +23,7 @@ test_set_x_flatten = test_set_x_orig.reshape(m_test, -1).T
 train_set_x = train_set_x_flatten / 255.0
 test_set_x = test_set_x_flatten / 255.0
 
-test_time = "200229_2316"
+test_time = "200301_1703"
 
 root = os.getcwd()
 dir = root + "/results/" + test_time + "/"
@@ -38,14 +38,22 @@ with open(parameters_dir, "rb") as f:
 with open(costs_dir, "rb") as f:
     costs = pickle.load(f)
 
-layer_dims, lambd, learning_rate, iterations, seed = hyperparameters
-
+(
+    layer_dims,
+    learning_rate,
+    num_epochs,
+    mini_batch_size,
+    lambd,
+    beta1,
+    beta2,
+    epsilon,
+) = hyperparameters
 # Predict
 Y_predicted = predict(len(layer_dims) - 1, train_set_x, parameters)
-print(Y_predicted)
-print(train_set_y)
+# print(Y_predicted)
+# print(train_set_y)
 accuracy = 100 - np.mean(np.abs(Y_predicted - train_set_y)) * 100
-print(accuracy)
+# print(accuracy)
 
 result = {"Y_predicted": Y_predicted, "accuracy": accuracy}
 

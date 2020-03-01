@@ -346,7 +346,6 @@ def update_parameters(parameters, grads, learning_rate):
 
 def predict(L, X, parameters):
     AL, caches = L_model_forward(L, X, parameters)
-    print(AL)
     Y_predicted = np.zeros((1, AL.shape[1]))
     for i in range(AL.shape[1]):
         if AL[0][i] > 0.5:

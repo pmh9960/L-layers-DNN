@@ -9,7 +9,8 @@ from pathlib import Path
 from PIL import Image
 from scipy import ndimage
 from lr_utils import load_dataset
-from regularization import *
+from dnn import predict
+from regularization import initialize_parameters_he, optimize_with_regularization
 from gradient_checking import gradient_check_n, gradient_check
 from adam import optimize_with_adam
 
@@ -32,18 +33,30 @@ train_set_x = train_set_x_flatten / 255.0
 test_set_x = test_set_x_flatten / 255.0
 
 # Hyperparameters
-layer_dims = [train_set_x.shape[0], 3, train_set_y.shape[0]]
-learning_rate = 0.01
-iterations = 2000
-lambd = 0.1
+layer_dims = [train_set_x.shape[0], 5, train_set_y.shape[0]]
+learning_rate = 0.0001
+num_epochs = 5000
+mini_batch_size = 64
+lambd = 0.0
 beta1 = 0.9
 beta2 = 0.999
 epsilon = 1e-8
-hyperparameters = (layer_dims, learning_rate, iterations, lambd, beta1, beta2, epsilon)
+hyperparameters = (
+    layer_dims,
+    learning_rate,
+    num_epochs,
+    mini_batch_size,
+    lambd,
+    beta1,
+    beta2,
+    epsilon,
+)
 
 # Initialize
 parameters = initialize_parameters_he(layer_dims)
 
+
+# print(parameters)
 # opened_file_hyperparameters = dir / "20200229_1150_hyperparameters.txt"
 # opened_file_parameters = dir / "20200229_1150_parameters.txt"
 # opened_file_costs = dir / "20200229_1150_costs.txt"
@@ -66,7 +79,7 @@ parameters, grads, costs = optimize_with_adam(
 # gradient_check(layer_dims, lambd, train_set_x, train_set_y, parameters)
 
 # Plot
-plt.xlabel("iteration (hundred)")
+plt.xlabel("# of epoches (hundred)")
 plt.ylabel("cost")
 plt.plot(costs)
 # Predict
@@ -77,9 +90,11 @@ result = {"Y_predicted": Y_predicted, "accuracy": accuracy}
 
 # Save results
 root = os.getcwd()
+
 dir = root + "/results/" + current_time_str + "/"
-access_rights = 0o755
-os.mkdir(dir, access_rights)
+os.mkdir(dir)
+# access_rights = 0o7555
+# os.mkdir(dir, access_rights)
 
 plt.savefig(dir + current_time_str + ".png", dpi=300)
 
@@ -92,7 +107,8 @@ with open(dir + current_time_str + "_hyperparameters.pkl", "wb") as f:
 with open(dir + current_time_str + "_hyperparameters.txt", "wt") as f:
     f.write("Hyperparameters\n\n")
     f.write("Seed : " + str(seed) + "\n")
-    f.write("Iteration : " + str(iterations) + "\n")
+    f.write("# of Epochs : " + str(num_epochs) + "\n")
+    f.write("Mini batch size : " + str(mini_batch_size) + "\n")
     f.write("Layers dimensions : " + str(layer_dims) + "\n")
     f.write("Learning rate : " + str(learning_rate) + "\n")
     f.write("Regularization factor Lambda : " + str(lambd) + "\n")

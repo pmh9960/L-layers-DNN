@@ -1,4 +1,6 @@
 import numpy as np
+import math
+from time import time
 from dnn import L_model_forward
 from regularization import (
     compute_cost_with_regularization,
@@ -77,6 +79,7 @@ def update_parameters_with_adam(
     L = len(parameters) // 2  # number of layers in the neural networks
     v_corrected = {}  # Initializing first moment estimate, python dictionary
     s_corrected = {}  # Initializing second moment estimate, python dictionary
+    t = t + 1
 
     # Perform Adam update on all parameters
     for l in range(L):
@@ -112,6 +115,14 @@ def update_parameters_with_adam(
         s_corrected["db" + str(l + 1)] = s["db" + str(l + 1)] / (1 - beta2 ** t)
         ### END CODE HERE ###
 
+        # print(
+        #     v_corrected["dW" + str(l + 1)]
+        #     / (np.sqrt(s_corrected["dW" + str(l + 1)]) + epsilon)
+        # )
+        # print(
+        #     v_corrected["db" + str(l + 1)]
+        #     / (np.sqrt(s_corrected["db" + str(l + 1)]) + epsilon)
+        # )
         # Update parameters. Inputs: "parameters, learning_rate, v_corrected, s_corrected, epsilon". Output: "parameters".
         ### START CODE HERE ### (approx. 2 lines)
         parameters["W" + str(l + 1)] = parameters[
@@ -129,32 +140,102 @@ def update_parameters_with_adam(
     return parameters, v, s
 
 
-def optimize_with_adam(
-    hyperparameters, train_set_x, train_set_y, parameters, print_cost
-):
+# GRADED FUNCTION: random_mini_batches
 
-    (layer_dims, learning_rate, iterations, lambd, _, _, _,) = hyperparameters
+
+def random_mini_batches(X, Y, mini_batch_size, seed):
+    """
+    Creates a list of random minibatches from (X, Y)
+    
+    Arguments:
+    X -- input data, of shape (input size, number of examples)
+    Y -- true "label" vector (1 for blue dot / 0 for red dot), of shape (1, number of examples)
+    mini_batch_size -- size of the mini-batches, integer
+    
+    Returns:
+    mini_batches -- list of synchronous (mini_batch_X, mini_batch_Y)
+    """
+
+    np.random.seed(seed)  # To make your "random" minibatches the same as ours
+    m = X.shape[1]  # number of training examples
+    mini_batches = []
+
+    # Step 1: Shuffle (X, Y)
+    permutation = list(np.random.permutation(m))
+    shuffled_X = X[:, permutation]
+    shuffled_Y = Y[:, permutation].reshape((1, m))
+
+    # Step 2: Partition (shuffled_X, shuffled_Y). Minus the end case.
+    num_complete_minibatches = math.floor(
+        m / mini_batch_size
+    )  # number of mini batches of size mini_batch_size in your partitionning
+    for k in range(0, num_complete_minibatches):
+        ### START CODE HERE ### (approx. 2 lines)
+        mini_batch_X = shuffled_X[:, mini_batch_size * (k) : mini_batch_size * (k + 1)]
+        mini_batch_Y = shuffled_Y[:, mini_batch_size * (k) : mini_batch_size * (k + 1)]
+        ### END CODE HERE ###
+        mini_batch = (mini_batch_X, mini_batch_Y)
+        mini_batches.append(mini_batch)
+
+    # Handling the end case (last mini-batch < mini_batch_size)
+    if m % mini_batch_size != 0:
+        ### START CODE HERE ### (approx. 2 lines)
+        mini_batch_X = shuffled_X[:, mini_batch_size * int(num_complete_minibatches) :]
+        mini_batch_Y = shuffled_Y[:, mini_batch_size * int(num_complete_minibatches) :]
+        ### END CODE HERE ###
+        mini_batch = (mini_batch_X, mini_batch_Y)
+        mini_batches.append(mini_batch)
+
+    return mini_batches
+
+
+def optimize_with_adam(hyperparameters, X, Y, parameters, print_cost):
+
+    (
+        layer_dims,
+        learning_rate,
+        num_epochs,
+        mini_batch_size,
+        lambd,
+        beta1,
+        beta2,
+        epsilon,
+    ) = hyperparameters
+
     L = len(layer_dims) - 1
+    m = X.shape[1]
     costs = []
     v, s = initialize_adam(L, parameters)
 
-    for i in range(1, iterations):
-        # Forward propagation
-        AL, caches = L_model_forward(L, train_set_x, parameters)
-        # Compute cost
-        cost = compute_cost_with_regularization(
-            layer_dims, AL, train_set_y, parameters, lambd
-        )
+    for i in range(num_epochs):
 
-        # Backward propagation
-        grads = L_model_backward_with_regularization(AL, train_set_y, caches, lambd)
+        seed = np.random.seed(int(time()))
+        minibatches = random_mini_batches(X, Y, mini_batch_size, seed)
+        cost_total = 0
 
-        # Update parameters
-        parameters, v, s = update_parameters_with_adam(
-            parameters, grads, v, s, i, learning_rate,
+        for minibatch in minibatches:
+
+            (minibatch_X, minibatch_Y) = minibatch
+            # Forward propagation
+            AL, caches = L_model_forward(L, minibatch_X, parameters)
+            # Compute cost
+            cost_total += compute_cost_with_regularization(
+                layer_dims, AL, minibatch_Y, parameters, lambd
+            )
+
+            # Backward propagation
+            grads = L_model_backward_with_regularization(AL, minibatch_Y, caches, lambd)
+
+            # Update parameters
+            parameters, v, s = update_parameters_with_adam(
+                parameters, grads, v, s, i, learning_rate,
+            )
+
+        cost_avg = cost_total / (
+            int(m / mini_batch_size) + int(m % mini_batch_size != 0)
         )
         if i % 100 == 0 and print_cost:
-            print(f"Cost after iteration {i} : {cost}")
-            costs.append(cost)
+            print(f"Cost after Epoch {i} : {cost_avg}")
+            costs.append(cost_avg)
 
     return parameters, grads, costs
